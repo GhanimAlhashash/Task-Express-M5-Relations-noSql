@@ -1,5 +1,5 @@
-const Author = require("../../models/Author");
 const Post = require("../../models/Post");
+const Tag = require("../../models/Tag");
 
 exports.fetchPost = async (postId, next) => {
   try {
@@ -13,9 +13,6 @@ exports.fetchPost = async (postId, next) => {
 exports.postsCreate = async (req, res) => {
   try {
     const newPost = await Post.create(req.body);
-    await Author.findByIdAndUpdate(req.author.id, {
-      $push: { posts: newPost._id },
-    });
     res.status(201).json(newPost);
   } catch (error) {
     next(error);
@@ -40,11 +37,39 @@ exports.postsUpdate = async (req, res) => {
   }
 };
 
-exports.postsGet = async (req, res) => {
+exports.postsGet = async (req, res, next) => {
   try {
     const posts = await Post.find({}, "-createdAt -updatedAt")
       .populate("authorId", "name")
       .populate("tags", "name");
+    res.json(posts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.tagAdd = async (req, res) => {
+  try {
+    console.log(req.body);
+    const newTag = await Tag.create(req.body);
+    await Post.findByIdAndUpdate(req.post.id, {
+      $push: { tags: newTag },
+    });
+    await Tag.findByIdAndUpdate(newTag._id, {
+      $push: { posts: req.post.id },
+    });
+    res.status(201).json(newTag);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.tagsGet = async (req, res, next) => {
+  try {
+    const tags = await Post.find({}, "-createdAt -updatedAt").populate("Tag", [
+      "name",
+      "posts",
+    ]);
     res.json(posts);
   } catch (error) {
     next(error);

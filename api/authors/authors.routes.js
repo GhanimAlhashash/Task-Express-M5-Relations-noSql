@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const {
-  authorsGet,
-  authorsUpdate,
-  authorsDelete,
-  authorsCreate,
   fetchAuthor,
+  postsGet,
+  postsUpdate,
+  postsDelete,
+  authorCreate,
   postsCreate,
+  authorsGet,
 } = require("./authors.controllers");
 
 router.param("authorId", async (req, res, next, authorId) => {
@@ -21,11 +22,12 @@ router.param("authorId", async (req, res, next, authorId) => {
   }
 });
 
-router.get("/", authorsGet);
-router.post("/", authorsCreate);
-router.post("/:authorId/posts", postsCreate);
-router.delete("/:authorId", authorsDelete);
+router.get("/", postsGet);
+router.post("/", authorCreate);
+router.post("/:authorId/post", postsCreate);
 
-router.put("/:authorId", authorsUpdate);
+router.delete("/:postId", postsDelete);
+
+router.put("/:postId", postsUpdate);
 
 module.exports = router;
